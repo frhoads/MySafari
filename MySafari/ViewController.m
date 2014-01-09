@@ -13,6 +13,7 @@
     
     __weak IBOutlet UIWebView *myWebView;
     __weak IBOutlet UITextField *myURLTextField;
+    __weak IBOutlet UIActivityIndicatorView *spinner;
 }
 
 @end
@@ -22,12 +23,13 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
     myWebView.scrollView.delegate = self;
+    spinner.hidden = YES;
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
 {
+    
     NSURL *url;
     
     if ([myURLTextField.text hasPrefix:@"http://"]) {
@@ -39,6 +41,8 @@
     NSURLRequest *request = [NSURLRequest requestWithURL:url];
     [myWebView loadRequest:request];
     [myURLTextField resignFirstResponder];
+    spinner.hidden = NO;
+    [spinner startAnimating];
 
     return YES;
 }
@@ -67,13 +71,13 @@
     {
         NSLog(@"Scrolling Down");
         myURLTextField.alpha += 0.05;
-        myURLTextField.frame = CGRectMake(myURLTextField.frame.origin.x, 30, myURLTextField.frame.size.width, myURLTextField.frame.size.height);
+//        myURLTextField.frame = CGRectMake(myURLTextField.frame.origin.x, 30, myURLTextField.frame.size.width, myURLTextField.frame.size.height);
         
     } else
     {
         NSLog(@"Scrolling Up");
         myURLTextField.alpha -= 0.05;
-        myURLTextField.frame = CGRectMake(myURLTextField.frame.origin.x, (myURLTextField.frame.origin.y + 10), myURLTextField.frame.size.width, myURLTextField.frame.size.height);
+//        myURLTextField.frame = CGRectMake(myURLTextField.frame.origin.x, (myURLTextField.frame.origin.y + 10), myURLTextField.frame.size.width, myURLTextField.frame.size.height);
 
     }
 }
@@ -84,6 +88,16 @@
     [alert show];
 }
 
+- (void)webViewDidFinishLoad:(UIWebView *)webView {
+    NSString *currentURL = myWebView.request.URL.absoluteString;
+    myURLTextField.text = currentURL;
+    
+    self.navigationItem.title = [myWebView stringByEvaluatingJavaScriptFromString:@"document.title"];
+    
+    NSLog(@"Finished");
+    [spinner stopAnimating];
+    spinner.hidden = YES;
+}
 
 - (void)didReceiveMemoryWarning
 {
